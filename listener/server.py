@@ -46,10 +46,19 @@ def dump_map():
 @app.route('/list')
 def list_ips():
     '''Return current IP map'''
+
+    secret = flask.request.args.get("secret")
+    if not secret or secret != app.config["APP_SECRET"]:
+        return ("Nope", 403)
+
     return (json.dumps(app.config["IP_MAP"], indent=2, default=str, sort_keys=True), 200)
 
 @app.route('/activate')
 def activate():
+
+    secret = flask.request.args.get("secret")
+    if not secret or secret != app.config["APP_SECRET"]:
+        return ("Nope", 403)
 
     # get X-Real-IP or X-Forwarded-For #
     ip = flask.request.headers.get("X-Real-IP") or flask.request.headers.get("X-Real-IP")
@@ -69,7 +78,7 @@ def activate():
 def create_app():
     '''Call to init all'''
     
-    app.config["APP_SECRET"] = os.environ.get("APP_SECRET")
+    app.config["APP_SECRET"] = os.environ["APP_SECRET"]
     dump_map()
 
 
