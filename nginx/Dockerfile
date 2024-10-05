@@ -17,4 +17,8 @@ RUN chmod +x /wait_for_map_change.sh
 RUN ls -l /wait_for_map_change.sh
 
 # run inotify scrip & nginx #
-CMD echo "Waiting for 3s.."; sleep 3; nohup /wait_for_map_change.sh & nginx && sleep 100000d
+CMD echo "Waiting for 3s.."; echo "Targeting: $TARGET"; \
+     sed -i 's~REPLACE_TARGET~'"$TARGET"'~g' /etc/nginx/nginx.conf; \
+     cat /etc/nginx/nginx.conf; \
+     sleep 3;\
+     nohup /wait_for_map_change.sh & nginx && sleep 100000d
