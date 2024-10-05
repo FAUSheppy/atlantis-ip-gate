@@ -10,5 +10,5 @@ For setup information consult the `docker-compose.yaml`.
 
 ## nginx
 
-  curl server:port/ip
-  curl server:port/    # the main location
+    curl server:port/ip
+    curl server:port/    # the main location
