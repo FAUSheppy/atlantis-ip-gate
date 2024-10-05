@@ -1,0 +1,20 @@
+version: '3'
+services:
+  flask:
+    image: harbor-registry.atlantishq.de/atlantishq/atlantis-ip-gate-listener:latest
+    ports:
+        - 5000:5000
+    volumes:
+      - vpn-gate-data:/app/data/
+  nginx:
+    image: harbor-registry.atlantishq.de/atlantishq/atlantis-ip-gate-nginx:latest
+    volumes:
+      - vpn-gate-data:/data/
+    ports:
+      - 8000:8000
+    environment:
+      - LISTEN_PORT=8000
+      - TARGET=8000
+
+volumes:
+  vpn-gate-data:
