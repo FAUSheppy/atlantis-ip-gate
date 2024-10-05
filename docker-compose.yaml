@@ -6,6 +6,8 @@ services:
         - 5000:5000
     volumes:
       - vpn-gate-data:/app/data/
+    environment:
+      - APP_SECRET=secret
   nginx:
     image: harbor-registry.atlantishq.de/atlantishq/atlantis-ip-gate-nginx:latest
     volumes:
@@ -13,8 +15,7 @@ services:
     ports:
       - 8000:8000
     environment:
-      - LISTEN_PORT=8000
-      - TARGET=8000
+      - TARGET=http://server:port
 
 volumes:
   vpn-gate-data:
