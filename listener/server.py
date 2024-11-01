@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import datetime
+import secrets
 
 app = flask.Flask("IP-Listener")
 app.config["IP_MAP"] = dict()
@@ -43,7 +44,21 @@ def dump_map():
             f.write(template_ip_str.format(ip))
         f.write(end_str)
 
+@app.route('/one-time-token')
+def one_time_token():
+    '''Use the app secret to retrive a one time token'''
+
+    secret = flask.request.args.get("secret")
+    if not secret or secret != app.config["APP_SECRET"]:
+        return ("Nope", 403)
+
+    s = secrets.token_urlsafe(32)
+    app.config["ONE_TIME_SECRETS"].update({s:True})
+    return s
+
+
 @app.route('/am-i-unlocked')
+@app.route('/status')
 def get_status():
     '''Return information if an IP is unlocked and until when'''
 
@@ -79,7 +94,10 @@ def activate():
 
     secret = flask.request.args.get("secret")
     if not secret or secret != app.config["APP_SECRET"]:
-        return ("Nope", 403)
+        if secret in app.config["ONE_TIME_SECRETS"]:
+            del app.config["ONE_TIME_SECRETS"][secret]
+        else:
+            return ("Nope", 403)
 
     # get X-Real-IP or X-Forwarded-For #
     ip = flask.request.headers.get("X-Real-IP") or flask.request.headers.get("X-Real-IP")
@@ -100,6 +118,7 @@ def create_app():
     '''Call to init all'''
     
     app.config["APP_SECRET"] = os.environ["APP_SECRET"]
+    app.config["ONE_TIME_SECRETS"] = {}
     dump_map()
 
 
