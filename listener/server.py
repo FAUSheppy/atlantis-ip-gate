@@ -53,7 +53,7 @@ def one_time_token():
         return ("Nope", 403)
 
     s = secrets.token_urlsafe(32)
-    app.config["ONE_TIME_SECRETS"].update({s:True})
+    app.config["ONE_TIME_SECRETS"].update({s:datetime.datetime.now()})
     return s
 
 
@@ -95,7 +95,12 @@ def activate():
     secret = flask.request.args.get("secret")
     if not secret or secret != app.config["APP_SECRET"]:
         if secret in app.config["ONE_TIME_SECRETS"]:
-            del app.config["ONE_TIME_SECRETS"][secret]
+            max_token_age = datetime.timedelta(minutes=15)
+            if datetime.datetime.now() - app.config["ONE_TIME_SECRETS"][secret] > max_token_age:
+                del app.config["ONE_TIME_SECRETS"][secret]
+                return ("Token valid but has expired", 403)
+            else:
+                del app.config["ONE_TIME_SECRETS"][secret]
         else:
             return ("Nope", 403)
 
