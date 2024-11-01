@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import math
 import flask
 import argparse
 import datetime
@@ -41,6 +42,26 @@ def dump_map():
         for ip in app.config["IP_MAP"].keys():
             f.write(template_ip_str.format(ip))
         f.write(end_str)
+
+@app.route('/am-i-unlocked')
+def get_status():
+    '''Return information if an IP is unlocked and until when'''
+
+    ip = flask.request.headers.get("X-Real-IP") or flask.request.headers.get("X-Real-IP")
+
+    if not ip:
+        print("WARNING: Using request.remote_addr because no header is present", file=sys.stderr)
+        ip = flask.request.remote_addr
+
+    date = app.config["IP_MAP"].get(ip)
+    if date:
+        delta = datetime.datetime.now() - date + TIMEDELTA
+        timedelta_str = str(datetime.timedelta(seconds=math.ceil(delta.total_seconds())))
+        return (f"Network Unlocked ({timedelta_str} remaining)")
+    else:
+        return (f"Network Locked")
+
+    return (json.dumps(app.config["IP_MAP"], indent=2, default=str, sort_keys=True), 200)
 
 
 @app.route('/list')
