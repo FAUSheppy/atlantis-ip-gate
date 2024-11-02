@@ -70,9 +70,17 @@ def get_status():
 
     date = app.config["IP_MAP"].get(ip)
     if date:
-        delta = datetime.datetime.now() - date + TIMEDELTA
-        timedelta_str = str(datetime.timedelta(seconds=math.ceil(delta.total_seconds())))
-        return (f"Network Unlocked ({timedelta_str} remaining)")
+        delta = TIMEDELTA - (datetime.datetime.now() - date)
+        if delta < datetime.timedelta(0):
+
+            # change status message based on expiry time #
+            if delta < datetime.timedelta(days=-7):
+                del app.config["IP_MAP"][ip]
+
+            return "Network Locked (unlock expired)"
+        else:
+            timedelta_str = str(datetime.timedelta(seconds=math.ceil(delta.total_seconds())))
+            return (f"Network Unlocked ({timedelta_str} remaining)")
     else:
         return (f"Network Locked")
 
