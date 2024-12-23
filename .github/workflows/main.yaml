@@ -1,0 +1,40 @@
+name: Container Build for atlantis-ip-gate (nginx+listener)
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    environment:
+        name: prod
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASS }}
+
+      - name: atlantis-ip-gate-nginx
+        uses: docker/build-push-action@v3
+        with:
+          context: nginx
+          platforms: linux/amd64
+          push: true
+          tags: "${{ secrets.REGISTRY }}/atlantishq/atlantis-ip-gate-nginx:latest"
+
+      - name: atlantis-ip-gate-listener
+        uses: docker/build-push-action@v3
+        with:
+          context: listener
+          platforms: linux/amd64
+          push: true
+          tags: "${{ secrets.REGISTRY }}/atlantishq/atlantis-ip-gate-listener:latest"
