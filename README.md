@@ -21,6 +21,7 @@ This container allows forwarding of IPs based on OAuth-Authentication into inter
           - 8000:8000
         environment:
           - TARGET=<INTERNAL_URL_AND_PORT>
+          - TRUSTED_PROXY=<PROXY_TO_ALLOW_SET_REAL_IP_VIA_X_FORWARDED_FROM>
     volumes:
       vpn-gate-data:
 
